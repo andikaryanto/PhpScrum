@@ -50,6 +50,10 @@ $routes->group('/api', function ($routes) {
 	$routes->post('createtask', 'Rests\Tasks::createTask');
 	$routes->get('task/(:alphanum)', 'Rests\Tasks::getTask/$1');
 	$routes->delete('deletebatchtask', 'Rests\Tasks::deleteBatchTask');
+	$routes->get('mytasks/(:alphanum)', 'Rests\Tasks::getMyTasks/$1');
+
+
+	$routes->post('createsprint', 'Rests\Sprints::createSprint');
 });
 
 /**

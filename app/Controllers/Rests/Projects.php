@@ -40,6 +40,7 @@ class Projects extends Base_Rest {
                 foreach($projects as $p){
                     $project = $p->get_M_Project();
                     $project->StrStatus = M_enumdetails::findEnumName("ProjectStatus", $project->Status);
+                    $project->IsYours = $project->CreatedBy == $user->Username;
                     // $project->CreatedBy = $p->get_M_User()->Name;
                     $allProjects[] = $project;
                 }
@@ -106,14 +107,21 @@ class Projects extends Base_Rest {
                     ]
                 ];
                 $project->Backlogs = T_tasks::findAll($taskp);
+                $taskDone = 0;
+                $alltaskCount = 0;
                 foreach($project->Backlogs as $backlog){
                     $backlog->Tasks = $backlog->get_list_T_taskdetail(['order' => ['M_User_Id' => "ASC"]]);
                     foreach($backlog->Tasks as $detail){
+                        ++$alltaskCount;
+                        if($detail->Type == 5){
+                            $taskDone++;
+                        }
                         $detail->AssignTo = $detail->get_M_User()->Name;
                     }
                 }
-
+                $project->ProjectDone = round($taskDone / $alltaskCount * 100);
                 $project->Teams = $teams;
+                $project->IsYours = $project->CreatedBy == $user->Username;
                 $project->StrStatus = M_enumdetails::findEnumName("ProjectStatus", $project->Status);
                 
 

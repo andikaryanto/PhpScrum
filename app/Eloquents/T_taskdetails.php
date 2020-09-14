@@ -25,8 +25,8 @@ class T_taskdetails extends BaseEloquent {
     public function __construct()
     {   
         parent::__construct();
-        $this->Type = 1;
-        $this->Status = 1;
+        // $this->Type = 1;
+        // $this->Status = 1;
     }
 
     public function validate(){
