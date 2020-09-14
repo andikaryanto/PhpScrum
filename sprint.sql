@@ -1,0 +1,36 @@
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+# ------------------------------------------------------------
+# SCHEMA DUMP FOR TABLE: t_sprints
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `t_sprints`;
+CREATE TABLE `t_sprints` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+  `M_Project_Id` int(11) NOT NULL,
+  `Name` varchar(50) NOT NULL,
+  `Description` varchar(200) DEFAULT NULL,
+  `DateStart` date NOT NULL,
+  `DateEnd` date NOT NULL,
+  `IsActive` smallint(1) NOT NULL,
+  `Created` datetime DEFAULT NULL,
+  `CreatedBy` varchar(50) DEFAULT NULL,
+  `Updated` datetime DEFAULT NULL,
+  `UpdatedBy` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `FK_t_sprint_m_project` (`M_Project_Id`),
+  CONSTRAINT `FK_t_sprint_m_project` FOREIGN KEY (`M_Project_Id`) REFERENCES `m_projects` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
