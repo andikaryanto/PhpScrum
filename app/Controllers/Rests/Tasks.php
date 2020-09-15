@@ -180,30 +180,98 @@ class Tasks extends Base_Rest {
                     
                     
                 }
-
-                // $taskp = [
-                //     "where" => [
-                //         "M_Project_Id" => $id
-                //     ],
-                //     "order" => [
-                //         'Id' => "DESC"
-                //     ]
-                // ];
-                // $project->Backlogs = T_tasks::findAll($taskp);
-                // foreach($project->Backlogs as $backlog){
-                //     $backlog->Tasks = $backlog->get_list_T_taskdetail(['order' => ['M_User_Id' => "ASC"]]);
-                //     foreach($backlog->Tasks as $detail){
-                //         $detail->AssignTo = $detail->get_M_User()->Name;
-                //     }
-                // }
-
-                // $project->Teams = $teams;
-                // $project->StrStatus = M_enumdetails::findEnumName("ProjectStatus", $project->Status);
                 
 
                 $result = [
                     'Message' => "Sukses",
                     'Results' => $taskdetail,
+                    'Status' => ResponseCode::OK
+                ];
+                // $decoded = JWT::decode($jwt, $key, array('HS256')); 
+                $this->response->setStatusCode(200)->setJSON($result)->sendBody();
+            } else {
+                throw new EloquentException("User is not granted", null, ResponseCode::NO_ACCESS_USER_MODULE);
+            }
+        } catch (EloquentException $e){
+            $result = [
+                'Message' => $e->getMessage(),
+                'Results' => null,
+                'Status' => $e->getReponseCode()
+            ];
+            $this->response->setStatusCode(400)->setJSON($result)->sendBody();
+        }
+    }
+
+    public function moveToType($type){
+        try{
+            $user = $this->getUseraccount();
+            if(!empty($user)){
+                $taskdetails = (array)$this->request->getJson()->TasksIds;
+
+                $tasks = T_taskdetails::findAll(['whereIn' => ["Id" => $taskdetails]]);
+
+                foreach($tasks as $t){
+                    $t->Type = $type;
+                    if(!$t->save()){
+                        throw new EloquentException("Failed to move story", null, ResponseCode::FAILED_SAVE_DATA);
+                    }
+                }
+
+                $result = [
+                    'Message' => "Sukses",
+                    'Result' => null,
+                    'Status' => ResponseCode::OK
+                ];
+                // $decoded = JWT::decode($jwt, $key, array('HS256')); 
+                $this->response->setStatusCode(200)->setJSON($result)->sendBody();
+            } else {
+                throw new EloquentException("User is not granted", null, ResponseCode::NO_ACCESS_USER_MODULE);
+            }
+        } catch (EloquentException $e){
+            $result = [
+                'Message' => $e->getMessage(),
+                'Result' => null,
+                'Status' => $e->getReponseCode()
+            ];
+            $this->response->setStatusCode(400)->setJSON($result)->sendBody();
+        }
+    }
+
+    public function getTasksCheck($id){
+        try{
+            $user = $this->getUseraccount();
+            if(!empty($user)){
+
+                $taskp = [
+                    "join" => [
+                        "t_tasks" => [[
+                            'key' => 't_taskdetails.T_Task_Id = t_tasks.Id',
+                            'type' => 'inner'
+                        ]],
+                        "m_projects" => [[
+                            'key' => 't_tasks.M_Project_Id = m_projects.Id',
+                            'type' => 'inner'
+                        ]]
+                    ],
+                    "where" => [
+                        "m_projects.Id" => $id,
+                        "t_taskdetails.Type" => 4
+                        
+                    ],
+                    "order" => [
+                        "t_taskdetails.M_User_Id" => "DESC"
+                    ]
+                ];
+
+                $checkedStory = T_taskdetails::findAll($taskp);
+                
+                foreach($checkedStory as $c){
+                    $c->AssignTo = $c->get_M_User()->Name;
+                }
+
+                $result = [
+                    'Message' => "Sukses",
+                    'Results' => $checkedStory,
                     'Status' => ResponseCode::OK
                 ];
                 // $decoded = JWT::decode($jwt, $key, array('HS256')); 

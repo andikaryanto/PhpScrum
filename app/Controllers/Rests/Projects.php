@@ -9,6 +9,7 @@ use App\Eloquents\M_profiles;
 use App\Eloquents\M_projects;
 use App\Eloquents\M_users;
 use App\Eloquents\T_projectinteracts;
+use App\Eloquents\T_sprints;
 use App\Eloquents\T_tasks;
 use App\Libraries\DbTrans;
 use App\Libraries\ResponseCode;
@@ -119,11 +120,22 @@ class Projects extends Base_Rest {
                         $detail->AssignTo = $detail->get_M_User()->Name;
                     }
                 }
-                $project->ProjectDone = round($taskDone / $alltaskCount * 100);
+                $project->ProjectDone = $alltaskCount > 0 ? round($taskDone / $alltaskCount * 100) : 0;
                 $project->Teams = $teams;
                 $project->IsYours = $project->CreatedBy == $user->Username;
                 $project->StrStatus = M_enumdetails::findEnumName("ProjectStatus", $project->Status);
-                
+
+                $p = [
+                    'where' =>[
+                        "M_Project_Id" => $id,
+                        "IsActive" => 1
+                    ], 
+                    'order' => [
+                        "Created" => "DESC"
+                    ]
+                ];
+                $sprints = T_sprints::findOneOrNew($p);
+                $project->ActiveSprint = $sprints->Name;
 
                 $result = [
                     'Message' => "Sukses",
@@ -193,41 +205,6 @@ class Projects extends Base_Rest {
                 ];
                 $this->response->setStatusCode(400)->setJSON($result)->sendBody();
             }
-            // if(!empty($user)){
-            //     $params = [
-            //         "where" => [
-            //             "M_User_Id" => $user->Id
-            //         ],
-            //         "order" => [
-            //             "M_Project_Id" => "DESC"
-            //         ]
-                    
-            //     ];
-            //     $projects = T_projectinteracts::findAll($params);
-
-            //     $allProjects = [];
-
-            //     foreach($projects as $p){
-            //         $project = $p->get_M_Project();
-            //         $project->StrStatus = M_enumdetails::findEnumName("ProjectStatus", $project->Status);
-            //         $allProjects[] = $project;
-            //     }
-
-                // $result = [
-                //     'Message' => "Sukses",
-                //     'Results' => $teams,
-                //     'Status' => ResponseCode::OK
-                // ];
-                // // $decoded = JWT::decode($jwt, $key, array('HS256')); 
-                // $this->response->setStatusCode(200)->setJSON($result)->sendBody();
-            // } else {
-            //     $result = [
-            //         'Message' => "Failed",
-            //         'Result' => [],
-            //         'Status' => ResponseCode::NO_DATA_FOUND
-            //     ];
-            //     $this->response->setStatusCode(400)->setJSON($result)->sendBody();
-            // }
         }
     }
 
