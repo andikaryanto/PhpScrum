@@ -41,15 +41,15 @@ class File
                 return false;
             }
 
-        if (!file_exists(FCPATH. $this->destination))
-            mkdir(FCPATH . $this->destination, 0777, true);
+        if (!file_exists( $this->destination))
+            mkdir($this->destination, 0777, true);
         $nameex = "";
         if ($usePrefixName) {
             $date = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
             $nameex = $date->format("Ymd_His");
         }
 
-        if (move_uploaded_file($files->getTempName(), FCPATH . $this->destination . DIRECTORY_SEPARATOR . $nameex . str_replace(" ","-",$files->getName()))) {
+        if (move_uploaded_file($files->getTempName(), $this->destination . DIRECTORY_SEPARATOR . $nameex . str_replace(" ","-",$files->getName()))) {
 
             $this->urlfile = $this->destination . "/" . $nameex . str_replace(" ","-",$files->getName());
             return true;

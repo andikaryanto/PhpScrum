@@ -4,6 +4,7 @@ namespace App\Controllers\Rests;
 use AndikAryanto11\Exception\DatabaseException;
 use App\Classes\Exception\EloquentException;
 use App\Controllers\Rests\Base_Rest;
+use App\Eloquents\M_profiles;
 use App\Eloquents\M_projects;
 use App\Eloquents\T_projectinteracts;
 use App\Eloquents\T_taskdetails;
@@ -47,13 +48,14 @@ class Tasks extends Base_Rest {
         }
     }
 
-    public function getTask($id){
+    public function getTasks($id){
         try{
             if($this->isGranted()){
                 $task = T_tasks::find($id);
                 $task->Taskdetails = $task->get_list_T_taskdetail(['order' => ['M_User_Id' => "ASC"]]);
                 foreach($task->Taskdetails as $detail){
                     $detail->AssignTo = $detail->get_M_User()->Name;
+                    $detail->Comments = count($detail->get_list_T_Comment());
                 }
 
                 $result = [
@@ -283,6 +285,40 @@ class Tasks extends Base_Rest {
             $result = [
                 'Message' => $e->getMessage(),
                 'Results' => null,
+                'Status' => $e->getReponseCode()
+            ];
+            $this->response->setStatusCode(400)->setJSON($result)->sendBody();
+        }
+    }
+
+    public function getTask($id){
+        try{
+            if($this->isGranted()){
+                $taskdetail = T_taskdetails::find($id);
+                $taskdetail->Comments = $taskdetail->get_list_T_Comment(['order' => ['Created' => "ASC"]]);
+                foreach($taskdetail->Comments as $comment){
+                    $user = $comment->get_M_User();
+                    $comment->SurogateId = $comment->Id;
+                    $comment->Photo = M_profiles::findOneOrNew(['where' => ["M_User_Id" => $user->Id]])->Photo;
+                    $comment->CommentedBy = $user->Name;
+                    $comment->status = "posted";
+                    $comment->Attachment =$comment->get_list_T_Commentattachment();
+                }
+
+
+                $result = [
+                    'Message' => "Success",
+                    'Result' => $taskdetail,
+                    'Status' => ResponseCode::OK
+                ];
+                $this->response->setStatusCode(200)->setJSON($result)->sendBody();
+            } else {
+                throw new EloquentException("Not Granted", null, ResponseCode::NO_ACCESS_USER_MODULE);
+            }
+        } catch (EloquentException $e){
+            $result = [
+                'Message' => $e->getMessage(),
+                'Result' => null,
                 'Status' => $e->getReponseCode()
             ];
             $this->response->setStatusCode(400)->setJSON($result)->sendBody();
