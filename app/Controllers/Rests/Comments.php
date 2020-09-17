@@ -36,27 +36,27 @@ class Comments extends Base_Rest {
                             $commentattachment = new T_commentattachments();
                             $commentattachment->T_Comment_Id = $comment->Id;
                             $commentattachment->FileName = $cifiles->getName();
-                            $commentattachment->Type = $cifiles->getClientExtension();
+                            $commentattachment->Type = $cifiles->getExtension();
                             $commentattachment->UrlFile = $file->getFileUrl();
                             if(!$commentattachment->save()){
-                                throw new EloquentException("Failed to save image", $comment, ResponseCode::FAILED_SAVE_DATA);
+                                throw new EloquentException("Failed to save file", $comment, ResponseCode::FAILED_SAVE_DATA);
                             }
                         } else {
-                            throw new EloquentException("Failed to upload file or more", $comment, ResponseCode::FAILED_SAVE_DATA);
+                            throw new EloquentException($comment->Id, $comment, ResponseCode::FAILED_SAVE_DATA);
                         }
 
                     }
 
                     $result = [
                         'Message' => "Success",
-                        'Result' => $keys,
+                        'Result' => $comment,
                         'Status' => ResponseCode::OK
                     ];
                     $this->response->setStatusCode(200)->setJSON($result)->sendBody();
                 } else {
                     throw new EloquentException("Failed to save data", $comment, ResponseCode::FAILED_SAVE_DATA);
                 }
-                DbTrans::rollback();
+                DbTrans::commit();
             } else {
                 throw new EloquentException("Not Granted", null, ResponseCode::NO_ACCESS_USER_MODULE);
             }
@@ -64,7 +64,7 @@ class Comments extends Base_Rest {
             DbTrans::rollback();
             $result = [
                 'Message' => $e->getMessage(),
-                'Result' => null,
+                'Result' => $e->getEntity(),
                 'Status' => $e->getReponseCode()
             ];
             $this->response->setStatusCode(400)->setJSON($result)->sendBody();

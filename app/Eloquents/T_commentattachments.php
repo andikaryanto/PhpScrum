@@ -6,6 +6,8 @@ class T_commentattachments extends BaseEloquent {
 
     public $Id;
     public $T_Comment_Id;
+    public $FileName;
+    public $Type;
     public $UrlFile;
     public $Created;
     public $CreatedBy;

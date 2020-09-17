@@ -5,6 +5,7 @@ namespace App\Libraries;
 use DateTime;
 use DateTimeZone;
 use \CodeIgniter\HTTP\Files\UploadedFile;
+use Exception;
 
 class File
 {

@@ -302,7 +302,7 @@ class Tasks extends Base_Rest {
                     $comment->Photo = M_profiles::findOneOrNew(['where' => ["M_User_Id" => $user->Id]])->Photo;
                     $comment->CommentedBy = $user->Name;
                     $comment->status = "posted";
-                    $comment->Attachment =$comment->get_list_T_Commentattachment();
+                    $comment->Attachments =$comment->get_list_T_Commentattachment();
                 }
 
 
