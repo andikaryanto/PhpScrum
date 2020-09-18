@@ -148,40 +148,49 @@ class Tasks extends Base_Rest {
             if(!empty($user)){
                 $type = $this->request->getGet("type");
 
-                $project = M_projects::find($projectid);
 
                 $params = [
+                    "join" => [
+                        "t_tasks" =>[[
+                            "key" => "t_taskdetails.T_Task_Id = t_tasks.Id",
+                            "type" => "left"
+                        ]],
+                        "m_projects" =>[[
+                            "key" => "t_tasks.M_Project_Id = m_projects.Id",
+                            "type" => "left"
+                        ]]
+                        ],
                     "where" => [
-                        "M_Project_Id" => $project->Id
+                        "m_projects.Id" => $projectid,
+                        "t_taskdetails.M_User_Id" => $user->Id,
+                        "t_taskdetails.Type" => $type
                     ],
                     "order" => [
-                        "Created" => "DESC"
+                        "t_taskdetails.Created" => "DESC"
                     ]
                     
                 ];
-                $tasks = T_tasks::findAll($params);
-                $taskdetail = [];
+                $taskdetail = T_taskdetails::findAll($params);
+                // $taskdetail = [];
                 
 
-                foreach($tasks as $t){
-                    $p = [
-                        "where" => [ 
-                            "M_User_Id" => $user->Id,
-                            "Type" => $type
-                        ],
-                        "order" => [
-                            "Created" => "DESC"
-                        ]
-                    ];
-                    $value = $t->get_list_T_Taskdetail($p);
-                    if(count($value) > 0){
-                        $t->TasksDetail = $value;
-                        $taskdetail[] = $t;
-                    }
-                        
-                    
-                    
-                }
+                // foreach($tasks as $t){
+                //     $p = [
+                //         "where" => [ 
+                //             "M_User_Id" => $user->Id,
+                //             "Type" => $type
+                //         ],
+                //         "order" => [
+                //             "Created" => "DESC"
+                //         ]
+                //     ];
+                //     $value = $t->get_list_T_Taskdetail($p);
+                //     $t->TasksDetail = $value;
+                //     foreach($value as $v)
+                //         $v->Comments = count($v->get_list_T_Comment());
+                //     }
+                //     $taskdetail[] = $t;                
+                // }
                 
 
                 $result = [
