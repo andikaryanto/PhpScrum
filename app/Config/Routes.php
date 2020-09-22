@@ -47,6 +47,7 @@ $routes->group('/api', function ($routes) {
 
 
 	$routes->post('createbacklog', 'Rests\Tasks::createBacklog');
+	$routes->delete('deletebacklog/(:alphanum)', 'Rests\Tasks::deleteBacklog/$1');
 	$routes->post('createtask', 'Rests\Tasks::createTask');
 	$routes->get('tasks/(:alphanum)', 'Rests\Tasks::getTasks/$1');
 	$routes->get('task/(:alphanum)', 'Rests\Tasks::getTask/$1');

@@ -58,11 +58,11 @@ class Sprints extends Base_Rest {
                         "join" => [
                             "t_tasks" => [[
                                 'key' => 't_taskdetails.T_Task_Id = t_tasks.Id',
-                                'type' => 'inner'
+                                'type' => 'left'
                             ]],
                             "m_projects" => [[
                                 'key' => 't_tasks.M_Project_Id = m_projects.Id',
-                                'type' => 'inner'
+                                'type' => 'left'
                             ]]
                         ],
                         "where" => [
@@ -78,7 +78,7 @@ class Sprints extends Base_Rest {
                     foreach($unfinishesStories as $u){
                         $u->Type = 1;
                         if(!$u->save()){
-                            throw new EloquentException("Failed to set Back Log", $sprint, ResponseCode::FAILED_SAVE_DATA);
+                            throw new EloquentException("Failed to set Back Log", $u, ResponseCode::FAILED_SAVE_DATA);
                         }
                     }
 

@@ -48,11 +48,43 @@ class Tasks extends Base_Rest {
         }
     }
 
+    public function deleteBacklog($id){
+        try{
+            if($this->isGranted()){
+                $task = T_tasks::find($id);
+                if($task->delete()){
+                    $result = [
+                        'Message' => "Success",
+                        'Result' => $task,
+                        'Status' => ResponseCode::OK
+                    ];
+                    $this->response->setStatusCode(200)->setJSON($result)->sendBody();
+                } else {
+                    throw new EloquentException("Failed to delet Backlog", $task, ResponseCode::FAILED_SAVE_DATA);
+                }
+            } else {
+                throw new EloquentException("Not Granted", null, ResponseCode::NO_ACCESS_USER_MODULE);
+            }
+        } catch (EloquentException $e){
+            $result = [
+                'Message' => $e->getMessage(),
+                'Result' => null,
+                'Status' => $e->getReponseCode()
+            ];
+            $this->response->setStatusCode(400)->setJSON($result)->sendBody();
+        }
+    }
+
     public function getTasks($id){
         try{
             if($this->isGranted()){
                 $task = T_tasks::find($id);
-                $task->Taskdetails = $task->get_list_T_taskdetail(['order' => ['M_User_Id' => "ASC"]]);
+                $p = [
+                    ['order' => ['M_User_Id' => "ASC"]]
+                ];
+
+
+                $task->Taskdetails = $task->get_list_T_taskdetail($p);
                 foreach($task->Taskdetails as $detail){
                     $detail->AssignTo = $detail->get_M_User()->Name;
                     $detail->Comments = count($detail->get_list_T_Comment());

@@ -70,6 +70,8 @@ class Projects extends Base_Rest {
             $user = $this->getUseraccount();
             if(!empty($user)){
 
+                $type = (array)$this->request->getGet("type");
+               
                 $project = M_projects::find($id);
 
                 $params = [
@@ -111,7 +113,11 @@ class Projects extends Base_Rest {
                 $taskDone = 0;
                 $alltaskCount = 0;
                 foreach($project->Backlogs as $backlog){
-                    $backlog->Tasks = $backlog->get_list_T_taskdetail(['order' => ['M_User_Id' => "ASC"]]);
+                    $paramsdetail = ['order' => ['M_User_Id' => "ASC"]];
+                    if(!empty($type)){
+                        $paramsdetail['whereIn'] = ["Type" => $type];
+                    }
+                    $backlog->Tasks = $backlog->get_list_T_taskdetail($paramsdetail);
                     foreach($backlog->Tasks as $detail){
                         ++$alltaskCount;
                         if($detail->Type == 5){
