@@ -10,6 +10,7 @@ Options All -Indexes
 <IfModule mod_rewrite.c>
 	Options +FollowSymlinks
 	RewriteEngine On
+	RewriteCond %{REQUEST_METHOD} OPTIONS 
 
 	# If you installed CodeIgniter in a subfolder, you will need to
 	# change the following line to match the subfolder you need.
@@ -25,6 +26,7 @@ Options All -Indexes
 	RewriteCond %{HTTPS} !=on
 	RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 	RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
+	# RewriteRule ^(.*)$ $1 [R=200,L]  
 
 	# Checks to see if the user is attempting to access a valid file,
     # such as an image or css document, if this isn't true it sends the
@@ -34,12 +36,13 @@ Options All -Indexes
 	RewriteRule ^(.*)$ index.php/$1 [L]
 	
 	# Ensure Authorization header is passed along
-    RewriteCond %{HTTP:Authorization} .
+    RewriteCond %{HTTP:Authorization} .	
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 	
+
 	Header set Access-Control-Allow-Origin "*"
-	Header set Access-Control-Allow-Methods "GET,PUT,POST,DELETE, OPTIONS"
-	Header set Access-Control-Allow-Headers: "Content-Type, Authorization"
+	Header set Access-Control-Allow-Methods "GET,PUT,POST,DELETE,OPTIONS"
+	Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
 </IfModule>
 
 <IfModule !mod_rewrite.c>

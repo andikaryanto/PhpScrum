@@ -67,8 +67,8 @@ class BaseEloquent extends Eloquent{
 
     public function beforeSave(){
         $useraccount = null;
-        $token = $this->request->getHeader('Authorization');
-        $jwt = JWT::decode($token->getValue(), getSecretKey(), array('HS256'));
+        $token = $this->request->getGet('Authorization');
+        $jwt = JWT::decode($token, getSecretKey(), array('HS256'));
         if($jwt){
             $useraccount = (object)$jwt->User;
             if(empty($this->{static::$primaryKey})){

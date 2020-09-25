@@ -24,8 +24,8 @@ class Base_Rest extends BaseController
     public function isGranted()
     {
 
-        $token = $this->request->getHeader('Authorization');
-        $jwt = JWT::decode($token->getValue(), getSecretKey(), array('HS256'));
+        $token = $this->request->getGet('Authorization');
+        $jwt = JWT::decode($token, getSecretKey(), array('HS256'));
         if($jwt){
             $this->useraccount = (object)$jwt->User;
             $currenttime =  set_date(get_current_date("Y-m-d H:i:s"));
@@ -43,8 +43,8 @@ class Base_Rest extends BaseController
     }
 
     public function getUseraccount(){
-        $token = $this->request->getHeader('Authorization');
-        $jwt = JWT::decode($token->getValue(), getSecretKey(), array('HS256'));
+        $token = $this->request->getGet('Authorization');
+        $jwt = JWT::decode($token, getSecretKey(), array('HS256'));
         if($jwt){
             $this->useraccount = (object)$jwt->User;
             return $this->useraccount;
