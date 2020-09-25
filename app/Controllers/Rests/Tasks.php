@@ -114,7 +114,7 @@ class Tasks extends Base_Rest {
         try{
             if($this->isGranted()){
                 
-                $deleteId = (array)$this->request->getPost();
+                $deleteId = (array)$this->request->getGet("TaskIds");
                 foreach($deleteId as $id){
                     $task = T_taskdetails::find($id);
                     if(!$task->delete()){
