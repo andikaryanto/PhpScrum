@@ -26,7 +26,9 @@ Options All -Indexes
 	RewriteCond %{HTTPS} !=on
 	RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 	RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
-	# RewriteRule ^(.*)$ $1 [R=200,L]  
+
+	RewriteCond %{REQUEST_METHOD} OPTIONS
+	RewriteRule ^(.*)$ $1 [R=200,L]  
 
 	# Checks to see if the user is attempting to access a valid file,
     # such as an image or css document, if this isn't true it sends the
@@ -39,11 +41,14 @@ Options All -Indexes
     RewriteCond %{HTTP:Authorization} .	
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 	
-
 	Header set Access-Control-Allow-Origin "*"
 	Header set Access-Control-Allow-Methods "GET,PUT,POST,DELETE,OPTIONS"
 	Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+
 </IfModule>
+
+<FilesMatch ".(eot|ttf|otf|woff)">
+</FilesMatch>
 
 <IfModule !mod_rewrite.c>
     # If we don't have mod_rewrite installed, all 404's

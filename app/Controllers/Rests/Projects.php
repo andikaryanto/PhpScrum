@@ -191,9 +191,11 @@ class Projects extends Base_Rest {
                     }
 
                     DbTrans::commit();
+                    $project->StrStatus = M_enumdetails::findEnumName("ProjectStatus", $project->Status);
+                    $project->IsYours = $project->CreatedBy == $user->Username;
                     $result = [
                         'Message' => "Success",
-                        'Result' => [$project],
+                        'Result' => $project,
                         'Status' => ResponseCode::OK
                     ];
                     $this->response->setStatusCode(200)->setJSON($result)->sendBody();
