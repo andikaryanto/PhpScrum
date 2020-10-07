@@ -195,7 +195,7 @@ class Tasks extends Base_Rest {
                     "where" => [
                         "m_projects.Id" => $projectid,
                         "t_taskdetails.M_User_Id" => $user->Id,
-                        "t_taskdetails.Type" => $type
+                        // "t_taskdetails.Type" => $type
                     ],
                     "order" => [
                         "t_taskdetails.Created" => "DESC"

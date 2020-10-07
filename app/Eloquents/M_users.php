@@ -8,6 +8,7 @@ class M_users extends BaseEloquent {
     public $Name;
     public $Username;
     public $Password;
+    public $FirebaseToken;
     public $Created;
     public $CreatedBy;
     public $Updated;

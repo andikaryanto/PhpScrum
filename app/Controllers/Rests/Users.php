@@ -7,6 +7,7 @@ use App\Controllers\Rests\Base_Rest;
 use App\Eloquents\M_positions;
 use App\Eloquents\M_profiles;
 use App\Eloquents\M_users;
+use App\Libraries\DbTrans;
 use App\Libraries\ResponseCode;
 use Firebase\JWT\JWT;
 
@@ -116,29 +117,74 @@ class Users extends Base_Rest {
         }
     }
 
-    public function register($email, $username, $password){
+    public function register(){
 
-        
+        try{
             $user = new M_users;
-            $user->Email = $email;
-            $user->Username = $username;
-            $user->setPassword($password);
+            $user->parseFromRequest(true);
+            $user->setPassword($user->Password);
+
+            DbTrans::beginTransaction();
             if($user->save()){
+
+                $profile = new M_profiles();
+                $profile->M_User_Id = $user->Id;
+                $profile->save();
+
                 $result = [
-                    'Message' => "Login Success",
-                    'SessionToken' => $user,
+                    'Message' => "Register Success",
+                    'Result' => null,
+                    'Status' => ResponseCode::OK
+                ];
+                DbTrans::commit();
+                $this->response->setStatusCode(200)->setJSON($result)->sendBody();
+            } else {
+                throw new EloquentException("Failed to register", null, ResponseCode::FAILED_SAVE_DATA);
+                
+            }
+        } catch(EloquentException $e) {
+
+            DbTrans::rollback();
+            $result = [
+                'Message' => $e->getMessages(),
+                'Result' => null,
+                'Status' => $e->getReponseCode()
+            ];
+            $this->response->setStatusCode(400)->setJSON($result)->sendBody();
+        }
+                
+        
+    }
+
+    public function updateProfile($userid){
+
+    }
+
+    public function updateToken($userid){
+        try{
+            $user = M_users::find($userid);
+            if(!empty($user)){
+                $token = $this->request->getJson()->Token;
+                $user->FirebaseToken = $token;
+                $user->save();
+                $result = [
+                    'Message' => "Success",
+                    'Result' => null,
                     'Status' => ResponseCode::OK
                 ];
                 $this->response->setStatusCode(200)->setJSON($result)->sendBody();
             } else {
-                $result = [
-                    'Message' => "Failed to register",
-                    'Status' => ResponseCode::FAILED_SAVE_DATA
-                ];
-                $this->response->setStatusCode(400)->setJSON($result)->sendBody();
+                throw new EloquentException("Failed to save", null, ResponseCode::FAILED_SAVE_DATA);
             }
-                
-        
+
+        } catch(EloquentException $e){
+            $result = [
+                'Message' => $e->getMessages(),
+                'Result' => null,
+                'Status' => $e->getReponseCode()
+            ];
+            $this->response->setStatusCode(400)->setJSON($result)->sendBody();
+        }
     }
 
     public function profile(){
