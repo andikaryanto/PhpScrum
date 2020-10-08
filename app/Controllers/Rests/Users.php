@@ -8,6 +8,7 @@ use App\Eloquents\M_positions;
 use App\Eloquents\M_profiles;
 use App\Eloquents\M_users;
 use App\Libraries\DbTrans;
+use App\Libraries\File;
 use App\Libraries\ResponseCode;
 use Firebase\JWT\JWT;
 
@@ -156,25 +157,91 @@ class Users extends Base_Rest {
         
     }
 
-    public function updateProfile($userid){
+    public function updateProfile(){
 
-    }
-
-    public function updateToken($userid){
         try{
-            $user = M_users::find($userid);
-            if(!empty($user)){
-                $token = $this->request->getJson()->Token;
-                $user->FirebaseToken = $token;
-                $user->save();
+            if($this->isGranted()){
+                DbTrans::beginTransaction();
+                $user = $this->getUseraccount();
+                $profile = M_profiles::findOne(["where" => ["M_User_Id" => $user->Id]]);
+                $profile->Name = $profile->get_M_User()->Name;
+                $profile->Position = $profile->get_M_Position();
+                $data = $this->request->getJson();
+                
+                if(!empty($data->M_Position_Id)){
+                    $profile->M_Position_Id = $data->M_Position_Id;
+                }
+
+                if(!empty($data->About)){
+                    $profile->About = $data->About;
+                }
+
+                if(!empty($data->Name)){
+                    $userData = M_users::find($user->Id);
+                    $userData->Name = $data->Name;
+                    if(!$userData->save()){
+                        throw new EloquentException("Failed to update profile", null , ResponseCode::FAILED_SAVE_DATA);
+                    }
+                }
+
+                foreach($_FILES as $key => $files){
+                    $file = new File("assets/profiles");
+                    $cifiles = $this->request->getFiles()[$key];
+                    if($file->upload($cifiles)){
+                        if(!empty($profile->Photo)){
+                            unlink($profile->Photo);
+                        }
+                        $profile->Photo = $file->getFileUrl();
+                    } else {
+                        throw new EloquentException("Failed to update profile", null , ResponseCode::FAILED_SAVE_DATA);
+                    }
+
+                }
+
+                if(!$profile->save()){
+                    throw new EloquentException("Failed to update profile", null , ResponseCode::FAILED_SAVE_DATA); 
+                } 
+
+                DbTrans::commit();
                 $result = [
-                    'Message' => "Success",
-                    'Result' => null,
+                    'Message' => "Succes Update Profile",
+                    'Result' => $profile,
                     'Status' => ResponseCode::OK
                 ];
                 $this->response->setStatusCode(200)->setJSON($result)->sendBody();
-            } else {
-                throw new EloquentException("Failed to save", null, ResponseCode::FAILED_SAVE_DATA);
+
+            }
+        } catch(EloquentException $e){
+
+            DbTrans::rollback();
+            $result = [
+                'Message' => $e->getMessages(),
+                'Result' => null,
+                'Status' => $e->getReponseCode()
+            ];
+            $this->response->setStatusCode(400)->setJSON($result)->sendBody();
+        }
+
+    }
+
+    public function updateToken(){
+        try{
+            if($this->isGranted()){
+                $user = $this->getUseraccount();
+                if(!empty($user)){
+                    $token = $this->request->getJson()->Token;
+                    $users = M_users::find($user->Id);
+                    $users->FirebaseToken = $token;
+                    $users->save();
+                    $result = [
+                        'Message' => "Success",
+                        'Result' => null,
+                        'Status' => ResponseCode::OK
+                    ];
+                    $this->response->setStatusCode(200)->setJSON($result)->sendBody();
+                } else {
+                    throw new EloquentException("Failed to save", null, ResponseCode::FAILED_SAVE_DATA);
+                }
             }
 
         } catch(EloquentException $e){
@@ -198,6 +265,7 @@ class Users extends Base_Rest {
             ];
             $profile = M_profiles::findOneOrNew($params);
             $profile->Position = $profile->get_M_Position();
+            $profile->Name = $profile->get_M_User()->Name;
             $result = [
                 'Message' => "Success",
                 'Result' => $profile,

@@ -35,9 +35,10 @@ $routes->get('/', 'Home::index');
 $routes->group('/api', function ($routes) {
     $routes->get('login/(:alphanum)/(:alphanum)', 'Rests\Users::login/$1/$2');
 	$routes->post('register', 'Rests\Users::register');
-	$routes->post('updatetoken/(:alphanum)', 'Rests\Users::updateToken/$1');
+	$routes->post('updatetoken', 'Rests\Users::updateToken');
 	$routes->get('profile', 'Rests\Users::profile');
 	$routes->get('profiles', 'Rests\Users::profiles');
+	$routes->post('updateprofile', 'Rests\Users::updateProfile');
 	
 
 	$routes->get('projects', 'Rests\Projects::getProjects');
