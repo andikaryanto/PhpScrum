@@ -18,7 +18,7 @@ Options All -Indexes
 	# RewriteBase /
 	RewriteBase /PhpScrum/
 
-	# Redirect Trailing Slashes...
+	# Redirect Trailing Slashes... 
 	RewriteCond %{REQUEST_FILENAME} !-d
     	RewriteRule ^(.*)/$ /$1 [L,R=301]
 
