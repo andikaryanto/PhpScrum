@@ -80,7 +80,7 @@ class Tasks extends Base_Rest {
             if($this->isGranted()){
                 $task = T_tasks::find($id);
                 $p = [
-                    ['order' => ['M_User_Id' => "ASC"]]
+                    'order' => ['M_User_Id' => "ASC"]
                 ];
 
 
